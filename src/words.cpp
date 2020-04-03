@@ -1,12 +1,94 @@
 #include "words.hpp"
 
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
+#include <cctype>
 #include <iterator>
 #include <sstream>
 #include <vector>
 
-bool expletizeString(std::string &string) {
+/*
+ * Returns true if query exists in array, otherwise false
+ */
+bool isDeterminer(const std::string query) {
+	return std::binary_search(DETERMINERS.begin(), DETERMINERS.end(), query);
+}
 
+/*
+ * Returns the indices of the determiners in the string.
+ */
+std::vector<std::size_t> findDeterminerIndices(std::string const text) {
+	std::vector<std::size_t> indices;
+	bool lastWordWasDeterminer = false;
+
+	std::string word = "";
+	for (std::size_t i = 0; i < text.length(); i++) {
+		char c = text[i];
+		if (!isspace(c)) { // Build the word
+			word += c;
+		} else { // After the word is built, test it
+			// Reduce to only letters, excluding contractions
+			word.erase(remove_if(word.begin(), word.end(), [](char c) { return !isalpha(c) && c != '\''; } ), word.end());
+
+			std::transform(word.begin(), word.end(), word.begin(),
+			    [](unsigned char c){ return std::tolower(c); });
+
+			if (isDeterminer(word)) {
+				if (lastWordWasDeterminer) {
+					indices.pop_back();
+				}
+
+				indices.push_back(i);
+				lastWordWasDeterminer = true;
+			} else {
+				lastWordWasDeterminer = false;
+			}
+
+			word = "";
+		}
+
+	}
+	return indices;
+}
+
+bool expletizeString(std::string &string) {
+	std::vector<std::size_t> determinerIndices = findDeterminerIndices(string);
+	std::size_t offset = 0;
+
+	if (determinerIndices.empty()) {
+		return false;
+	}
+
+	std::srand(std::time(NULL));
+
+	for (std::size_t index : determinerIndices) {
+		// Choose one of three possiblities randomly
+		std::stringstream ss;
+		switch (rand() % 3 + 1) {
+		case 1:
+			// Insert a basic explicative
+			ss << " " << BASIC_EXPLICATIVES[rand() % BASIC_EXPLICATIVES.size()];
+			break;
+		case 2:
+			// Insert a random combination of a level and an ending
+			ss << " " << LEVELS[rand() % LEVELS.size()] << " " << ENDINGS[rand() % ENDINGS.size()];
+			break;
+		case 3:
+			// Insert a modified
+			if (rand() % 2 == 0) {
+				ss << " " << MODIFIED[rand() % MODIFIED.size()] << "-ass";
+			} else {
+				ss << " " << MODIFIED[rand() % MODIFIED.size()] << " as fuck";
+			}
+			break;
+		}
+
+		string = string.insert(index + offset, ss.str());
+		offset += ss.str().length();  // Increase the offset by the amount inserted
+	}
+
+	return true;
 }
 
 /*
@@ -19,33 +101,3 @@ bool expletizeString(std::string &string) {
 //                                 std::istream_iterator<std::string>()};
 //    return ret;
 //}
-
-/*
- * Returns true if query exists in array, otherwise false
- */
-bool isDeterminer(const std::string query) {
-	return std::binary_search(DETERMINERS.begin(), DETERMINERS.end(), query);
-}
-
-/*
- * Returns the indices of the determiners in the string.
- */
-std::vector<std::size_t> findDeterminerIndices(std::string text) {
-	std::vector<std::size_t> indices;
-
-	std::string word = "";
-	for (auto i = 0; i < text.length(); i++) {
-		char c = text[i];
-		if (!isspace(c)) { // Build the word
-			word += c;
-		} else { // After the word is built, test it
-			// Reduce to only letters
-			word = word.erase(remove_if(word.begin(), word.end(), [](char c) { return !isalpha(c); } ), word.end());
-			if (isDeterminer(word)) {
-				indices.push_back(i);
-			}
-		}
-
-	}
-	return indices;
-}

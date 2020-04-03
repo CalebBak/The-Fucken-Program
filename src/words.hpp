@@ -7,9 +7,9 @@
 /*
  * An alphabetically sorted list of every determiner in the English language
  */
-const std::array<std::string, 24> DETERMINERS = {
+const std::array<std::string, 23> DETERMINERS = {
 	"a", "an", "another", "any", "few", "her", "his", "its",
-	"many", "much", "my", "of", "our", "several", "some", "that",
+	"many", "much", "my", "of", "our", "several", "some",
 	"the", "their", "these", "this", "those", "very", "whose", "your"
 };
 
