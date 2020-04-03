@@ -7,12 +7,13 @@
 #include <iterator>
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 /*
  * Returns true if query exists in array, otherwise false
  */
-bool isDeterminer(const std::string query) {
-	return std::binary_search(DETERMINERS.begin(), DETERMINERS.end(), query);
+bool isDeterminer(const std::string query, bool chained) {
+	return (std::binary_search(DETERMINERS.begin(), DETERMINERS.end(), query) || (chained && std::binary_search(AFTERS.begin(), AFTERS.end(), query)));
 }
 
 /*
@@ -28,17 +29,20 @@ std::vector<std::size_t> findDeterminerIndices(std::string const text) {
 		if (!isspace(c)) { // Build the word
 			word += c;
 		} else { // After the word is built, test it
+
 			// Reduce to only letters, excluding contractions
 			word.erase(remove_if(word.begin(), word.end(), [](char c) { return !isalpha(c) && c != '\''; } ), word.end());
+			std::transform(word.begin(), word.end(), word.begin(), [](unsigned char c){ return std::tolower(c); });
 
-			std::transform(word.begin(), word.end(), word.begin(),
-			    [](unsigned char c){ return std::tolower(c); });
+			// DEBUG
+//			std::cout << word << ' ' << lastWordWasDeterminer << '\t';
+//			std::cout << isDeterminer(word, lastWordWasDeterminer) << ' ';
+//			std::cout << std::binary_search(AFTERS.begin(), AFTERS.end(), word) << std::endl;
 
-			if (isDeterminer(word)) {
+			if (isDeterminer(word, lastWordWasDeterminer)) {
 				if (lastWordWasDeterminer) {
-					indices.pop_back();
+					indices.pop_back(); // Remove the last determiner because it is directly behind this one
 				}
-
 				indices.push_back(i);
 				lastWordWasDeterminer = true;
 			} else {
@@ -57,7 +61,7 @@ bool expletizeString(std::string &string) {
 	std::size_t offset = 0;
 
 	if (determinerIndices.empty()) {
-		return false;
+		return false; // No change
 	}
 
 	std::srand(std::time(NULL));
@@ -65,23 +69,20 @@ bool expletizeString(std::string &string) {
 	for (std::size_t index : determinerIndices) {
 		// Choose one of three possiblities randomly
 		std::stringstream ss;
-		switch (rand() % 3 + 1) {
-		case 1:
+		float r = rand() % 8;
+		if (r < 5) {
 			// Insert a basic explicative
 			ss << " " << BASIC_EXPLICATIVES[rand() % BASIC_EXPLICATIVES.size()];
-			break;
-		case 2:
+		} else if (r < 6) {
 			// Insert a random combination of a level and an ending
 			ss << " " << LEVELS[rand() % LEVELS.size()] << " " << ENDINGS[rand() % ENDINGS.size()];
-			break;
-		case 3:
-			// Insert a modified
+		} else {
+			// Insert a modified explicitive
 			if (rand() % 2 == 0) {
 				ss << " " << MODIFIED[rand() % MODIFIED.size()] << "-ass";
 			} else {
 				ss << " " << MODIFIED[rand() % MODIFIED.size()] << " as fuck";
 			}
-			break;
 		}
 
 		string = string.insert(index + offset, ss.str());
