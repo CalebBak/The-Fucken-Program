@@ -1,35 +1,31 @@
 #ifndef WORDS_HPP_
 #define WORDS_HPP_
 
+#include <array>
 #include <string>
 
 /*
  * An alphabetically sorted list of every determiner in the English language
  */
-#define TOTAL_DETERMINERS 24
-const std::string DETERMINERS[TOTAL_DETERMINERS] = {
-		"a", "an", "another", "any", "few", "her", "his", "its",
-		"many", "much", "my", "of", "our", "several", "some", "that",
-		"the", "their", "these", "this", "those", "very", "whose", "your"
+const std::array<std::string, 24> DETERMINERS = {
+	"a", "an", "another", "any", "few", "her", "his", "its",
+	"many", "much", "my", "of", "our", "several", "some", "that",
+	"the", "their", "these", "this", "those", "very", "whose", "your"
 };
 
-#define TOTAL_BASIC_EXPLICATIVES 5
-const std::string BASIC_EXPLICATIVES[TOTAL_BASIC_EXPLICATIVES] = {
+const std::array<std::string, 5> BASIC_EXPLICATIVES = {
 		"damn", "goddamn", "fucking", "fuckin\'", "bitch-ass"
 };
 
-#define TOTAL_LEVELS 4
-const std::string LEVELS[TOTAL_LEVELS] = {
+const std::array<std::string, 4> LEVELS = {
 		"absolutely", "literally", "really", "incredibly"
 };
 
-#define TOTAL_ENDINGS 6
-const std::string ENDINGS[TOTAL_ENDINGS] = {
+const std::array<std::string, 6> ENDINGS = {
 		"garbage", "bad", "terrible", "ungood", "jank", "the worst"
 };
 
-#define TOTAL_MODIFIED 6
-const std::string MODIFIED[TOTAL_MODIFIED] = {
+const std::array<std::string, 10> MODIFIED = {
 		"jank", "tall", "short", "long", "old", "strong", "poor", "huge", "rare", "pure"
 };
 
