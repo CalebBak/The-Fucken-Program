@@ -26,7 +26,7 @@ std::vector<std::size_t> findDeterminerIndices(std::string const text) {
 	std::string word = "";
 	for (std::size_t i = 0; i < text.length(); i++) {
 		char c = text[i];
-		if (!isspace(c)) { // Build the word
+		if (!isspace(c) || c == '\0') { // Build the word
 			word += c;
 		} else { // After the word is built, test it
 
@@ -84,7 +84,6 @@ bool expletizeString(std::string &string) {
 				ss << " " << MODIFIED[rand() % MODIFIED.size()] << " as fuck";
 			}
 		}
-
 		string = string.insert(index + offset, ss.str());
 		offset += ss.str().length();  // Increase the offset by the amount inserted
 	}
